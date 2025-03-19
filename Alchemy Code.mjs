@@ -36,7 +36,7 @@ async function solveAlchemyStage1() {
     try {
         console.log("Deciphering alchemical code...");
         
-        // Alchemical symbols and corresponding atomic numbers
+        // Alchemical symbols
         const alchemical_map = {
             "☉": "Gold", // Gold (Sun) 79
             "☿": "Quicksilver", // QuickSilver (Mercury) 80
