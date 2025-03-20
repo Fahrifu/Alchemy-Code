@@ -23,7 +23,10 @@ async function startMission() {
         // Check what type of challenge we have received and solve accordingly
         if (challenge.includes("access code")) {
             await solveAlchemyStage1();
-        }
+        } else if (challenge.includes("Icy Lethe")) {
+            await challenge2();
+        } 
+        
     } catch (error) {
         console.error("Error starting mission:", error);
     }
@@ -61,6 +64,21 @@ async function solveAlchemyStage1() {
     }
 }
 
+async function challenge2() {
+    try {
+    const poem = "Still flows the Icy Lethe, Veiling all ’neath Eldritch Rime";
+
+    const extractedWord = poem.match(/[A-Z]/g).join('');
+
+    console.log("Extracted word: ", extractedWord);
+
+    const result = await submitAnswer(extractedWord);
+    console.log("Response from Alchemy API: ", result);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 /**
  * Submits an answer to the Alchemy system.
  * @param {string|number} answer - The computed answer to submit.
@@ -73,6 +91,7 @@ async function submitAnswer(answer) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer })
         });
+        console.log(answer);
         return await response.json();
     } catch (error) {
         console.error("Error submitting alchemy answer:", error);
