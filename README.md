@@ -27,7 +27,7 @@ We use a RegExp to find all uppercase letters (A-Z) in the given text
 const extractedWord = poem.match(/A-Z/g).join('');
 ```
 
-**Explanation of ```Javascript /[A-Z]/g```** 
+**Explanation of ```/[A-Z]/g```** 
 
 - [A-Z] -> Matches any single uppercase letter
 - g (Global flag) -> Ensures the search continues throughout the entire string instead stopping at first found.
