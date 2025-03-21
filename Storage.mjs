@@ -1,23 +1,29 @@
 export const alchemicalSymbols = [
-    { name: "Gold", symbol: "☉" },
-    { name: "Silver", symbol: "☽" },
-    { name: "Mercury", symbol: "☿" },
-    { name: "Copper", symbol: "♀" },
-    { name: "Iron", symbol: "♂" },
-    { name: "Tin", symbol: "♃" },
-    { name: "Lead", symbol: "♄" },
-    { name: "Antimony", symbol: "🜲" },
-    { name: "Arsenic", symbol: "🜺" },
-    { name: "Sulfur", symbol: "🜍" },
-    { name: "Salt", symbol: "🜔" },
-    { name: "Aqua Regia", symbol: "🜆" },
-    { name: "Aqua Fortis", symbol: "🜅" },
-    { name: "Vitriol", symbol: "🜖" },
-    { name: "Earth", symbol: "🜃" },
-    { name: "Air", symbol: "🜁" },
-    { name: "Fire", symbol: "🜂" },
-    { name: "Water", symbol: "🜄" }
+    { name: "Gold", symbol: "☉", atomicNumber: 79 },
+    { name: "Silver", symbol: "☽", atomicNumber: 47 },
+    { name: "Mercury", symbol: "☿", atomicNumber: 80 },
+    { name: "Copper", symbol: "♀", atomicNumber: 29 },
+    { name: "Iron", symbol: "♂", atomicNumber: 26 },
+    { name: "Tin", symbol: "♃", atomicNumber: 50 },
+    { name: "Lead", symbol: "♄", atomicNumber: 82 },
+    { name: "Antimony", symbol: "🜲", atomicNumber: 51 },
+    { name: "Arsenic", symbol: "🜺", atomicNumber: 33 },
+    { name: "Sulfur", symbol: "🜍", atomicNumber: 16 },
+    { name: "Salt", symbol: "🜔", atomicNumber: null }, 
+    { name: "Aqua Regia", symbol: "🜆", atomicNumber: null }, // mixture
+    { name: "Aqua Fortis", symbol: "🜅", atomicNumber: null }, // nitric acid
+    { name: "Vitriol", symbol: "🜖", atomicNumber: null }, 
+    { name: "Earth", symbol: "🜃", atomicNumber: null }, 
+    { name: "Air", symbol: "🜁", atomicNumber: null },
+    { name: "Fire", symbol: "🜂", atomicNumber: null },
+    { name: "Water", symbol: "🜄", atomicNumber: null },
+    { name: "Helium", symbol: "He", atomicNumber: 2 }
+
   ];
   
-  export default alchemicalSymbols;
+
+  export const symbolMap = Object.fromEntries(
+    alchemicalSymbols.map(entry => [entry.name.toLowerCase(), entry.symbol])
+  );
   
+  export default alchemicalSymbols & symbolMap;

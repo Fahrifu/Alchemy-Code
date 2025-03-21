@@ -2,7 +2,8 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import { cipher } from './Deciper.mjs';
 import { numberToChar } from './Deciper.mjs';
-import alchemicalSymbols from './Storage.mjs';
+import { alchemicalSymbols } from './Storage.mjs';
+import { encryptedGrid } from './encryptedgrid.mjs';
 
 // Email for authentication
 const PLAYER_EMAIL = "hlmnguyen@uia.no";
@@ -127,6 +128,67 @@ async function challenge3() {
 }
 
 
+async function challenge4() {
+    const symbolMap = Object.fromEntries(
+        alchemicalSymbols.map(({ name, symbol }) => [name.toLowerCase(), symbol])
+      );
+      
+    const encodedBlock = [
+        'GOLD COPPER GOLD GOLD SILVER',
+        'EARTH MERCURY COPPER FIRE AIR',
+        'FIRE EARTH LEAD EARTH SILVER',
+        'IRON GOLD SILVER WATER GOLD',
+        'COPPER FIRE GOLD IRON LEAD',
+        'EARTH COPPER COPPER TIN MERCURY'
+    ];
+
+    const words = encodedBlock.flatMap(line => line.split(' '));
+    const symbolSeq = words.map(w => symbolMap[w.toLowerCase()]).join('');
+
+    console.log('Decoded Words:', words);
+    console.log('Symbol Sequence:', symbolSeq);
+
+    const grid = encryptedGrid.split('\n').map(line => line.trim().split(' '));
+    const coords = findSymbolSequence(grid, symbolSeq);
+    console.log(coords)
+    const { row, col } = coords;
+    const atomicNumber = row * col;
+
+    const wordLine = encodedBlock[row-1];
+    const findElement = wordLine.split(' ')[col - 1];
+
+    console.log(`\n🧭 Match found at row ${row}, column ${col}`);
+    console.log(`🔢 Atomic number: ${atomicNumber}`);
+    console.log(`🧪 Element: ${findElement}`);
+
+    const result = await submitAnswer(findElement);
+    console.log("Response from Alchemy API:", result);
+}
+
+function findSymbolSequence(grid, sequence) {
+    const height = grid.length;
+    const width = grid[0].length;
+    const seqLen = sequence.length;
+  
+    // Horizontal search
+    for (let r = 0; r < height; r++) {
+      const row = grid[r].join('');
+      const idx = row.indexOf(sequence);
+      if (idx !== -1) return { row: r + 1, col: idx + 1 };
+    }
+  
+    // Vertical search
+    for (let c = 0; c < width; c++) {
+      let colStr = '';
+      for (let r = 0; r < height; r++) {
+        colStr += grid[r][c];
+      }
+      const idx = colStr.indexOf(sequence);
+      if (idx !== -1) return { row: idx + 1, col: c + 1 };
+    }
+    return null;
+  }
+
 /**
  * Submits an answer to the Alchemy system.
  * @param {string|number} answer - The computed answer to submit.
@@ -158,4 +220,5 @@ async function getClue() {
 }
 
 // Run the mission
-startMission().catch(console.error);
+//startMission().catch(console.error);
+challenge4()
