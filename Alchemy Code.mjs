@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
+import { cipher } from './Deciper.mjs';
+import { numberToChar } from './Deciper.mjs';
+import alchemicalSymbols from './Storage.mjs';
 
 // Email for authentication
 const PLAYER_EMAIL = "hlmnguyen@uia.no";
@@ -25,7 +28,9 @@ async function startMission() {
             await solveAlchemyStage1();
         } else if (challenge.includes("Icy Lethe")) {
             await challenge2();
-        } 
+        } else if (challenge.includes("Bibliotheca")) {
+            await challenge3();
+        }
         
     } catch (error) {
         console.error("Error starting mission:", error);
@@ -78,6 +83,49 @@ async function challenge2() {
         console.error(error);
     }
 }
+
+async function challenge3() {
+    // Decipher numbers
+    const words = cipher.split(/\s+/).map(n => {
+        if (n === ',' || n === ';') return n;
+        const num = parseInt(n, 10);
+        return isNaN(num) ? n : (numberToChar[num] ?? '?');
+    })
+
+    let sentence = words.join('');
+    sentence = sentence
+    .replace(/([a-z])([,.])/g, '$1$2')
+    .replace(/([,.])/g, '$1 ')
+    .replace(/\s+/g, ` `)
+    .trim();
+
+    console.log(sentence)
+
+    const aliases = {
+        heat: "fire",
+    }
+
+    const symbolMap = Object.fromEntries(
+        alchemicalSymbols.map(entry => [entry.name.toLowerCase(), entry.symbol])
+    );
+
+    const symbols = sentence
+    .toLowerCase()
+    .replace(/[.,;]/g, '')        // remove punctuation
+    .split(/\s+/)                 // split into words
+    .map(word => {
+      const resolved = aliases[word] || word;
+      return symbolMap[resolved] || null;
+    })
+    .filter(Boolean)             // remove nulls
+    .join('');
+
+    console.log("Output of symbols: ", symbols);
+
+    const result = await submitAnswer(symbols);
+    console.log("Response from Alchemy API:", result);
+}
+
 
 /**
  * Submits an answer to the Alchemy system.
