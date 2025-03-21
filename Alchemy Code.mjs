@@ -157,18 +157,20 @@ async function challenge4() {
     const wordLine = encodedBlock[row-1];
     const findElement = wordLine.split(' ')[col - 1];
 
-    console.log(`\n🧭 Match found at row ${row}, column ${col}`);
-    console.log(`🔢 Atomic number: ${atomicNumber}`);
-    console.log(`🧪 Element: ${findElement}`);
+    console.log(`\nMatch found at row ${row}, column ${col}`);
+    console.log(`Atomic number: ${atomicNumber}`);
+    console.log(`Element: ${findElement}`);
 
-    const result = await submitAnswer(findElement);
+
+
+    const result = await submitAnswer(findElement, atomicNumber);
     console.log("Response from Alchemy API:", result);
 }
 
 function findSymbolSequence(grid, sequence) {
     const height = grid.length;
     const width = grid[0].length;
-    const seqLen = sequence.length;
+    //const seqLen = sequence.length;
   
     // Horizontal search
     for (let r = 0; r < height; r++) {
@@ -193,15 +195,15 @@ function findSymbolSequence(grid, sequence) {
  * Submits an answer to the Alchemy system.
  * @param {string|number} answer - The computed answer to submit.
  */
-async function submitAnswer(answer) {
+async function submitAnswer(answer, atomicNumber) {
     try {
         console.log("Submitting alchemy answer...");
         const response = await fetch(`${ALCHEMY_API}/answer`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer })
+            body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer, atomicNumber })
         });
-        console.log(answer);
+        console.log(answer, atomicNumber);
         return await response.json();
     } catch (error) {
         console.error("Error submitting alchemy answer:", error);
