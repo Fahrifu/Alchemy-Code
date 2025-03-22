@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import { cipher } from './Deciper.mjs';
 import { numberToChar } from './Deciper.mjs';
-import { alchemicalSymbols } from './Storage.mjs';
+import { alchemicalSymbols, symbolMap } from './Storage.mjs';
 import { encryptedGrid } from './encryptedgrid.mjs';
 
 // Email for authentication
@@ -31,6 +31,8 @@ async function startMission() {
             await challenge2();
         } else if (challenge.includes("Bibliotheca")) {
             await challenge3();
+        } else if (challenge.includes("Hidden experiments")) {
+            await challenge4();
         }
         
     } catch (error) {
@@ -129,9 +131,6 @@ async function challenge3() {
 
 
 async function challenge4() {
-    const symbolMap = Object.fromEntries(
-        alchemicalSymbols.map(({ name, symbol }) => [name.toLowerCase(), symbol])
-      );
       
     const encodedBlock = [
         'GOLD COPPER GOLD GOLD SILVER',
@@ -142,68 +141,85 @@ async function challenge4() {
         'EARTH COPPER COPPER TIN MERCURY'
     ];
 
-    const words = encodedBlock.flatMap(line => line.split(' '));
-    const symbolSeq = words.map(w => symbolMap[w.toLowerCase()]).join('');
+    console.log(encodedBlock);
 
-    console.log('Decoded Words:', words);
-    console.log('Symbol Sequence:', symbolSeq);
+    const pattern = encodedBlock
+    .flatMap(line =>
+        line.split(' ').map(word => symbolMap[word.toLowerCase()])
+    )
+    .join('');
 
-    const grid = encryptedGrid.split('\n').map(line => line.trim().split(' '));
-    const coords = findSymbolSequence(grid, symbolSeq);
-    console.log(coords)
-    const { row, col } = coords;
-    const atomicNumber = row * col;
+    console.log(pattern)
 
-    const wordLine = encodedBlock[row-1];
-    const findElement = wordLine.split(' ')[col - 1];
+    const patternArr = [...pattern];
+    const patternLength = patternArr.length;
+    
+    let grid = encryptedGrid.trim().split('\n').map(line => [...line]);
 
-    console.log(`\nMatch found at row ${row}, column ${col}`);
-    console.log(`Atomic number: ${atomicNumber}`);
-    console.log(`Element: ${findElement}`);
+    const maxCols = Math.max(...grid.map(row => row.length));
+    grid = grid.map(row => [...row, ...Array(maxCols - row.length).fill('')]);
 
-
-
-    const result = await submitAnswer(findElement, atomicNumber);
-    console.log("Response from Alchemy API:", result);
-}
-
-function findSymbolSequence(grid, sequence) {
-    const height = grid.length;
-    const width = grid[0].length;
-    //const seqLen = sequence.length;
-  
-    // Horizontal search
-    for (let r = 0; r < height; r++) {
-      const row = grid[r].join('');
-      const idx = row.indexOf(sequence);
-      if (idx !== -1) return { row: r + 1, col: idx + 1 };
+    function scanHorizontal(grid) {
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col <= maxCols - patternLength; col++) {
+                const slice = grid[row].slice(col, col + patternLength).join('');
+                if (slice === pattern) {
+                    return { row: row + 1, col: col + 1}
+                }
+            }
+        }
+        return null;
     }
-  
-    // Vertical search
-    for (let c = 0; c < width; c++) {
-      let colStr = '';
-      for (let r = 0; r < height; r++) {
-        colStr += grid[r][c];
+    
+    function scanVertical(grid) {
+        for (let col = 0; col < maxCols; col++) {
+          for (let row = 0; row <= grid.length - patternLength; row++) {
+            const slice = Array.from({ length: patternLength }, (_, i) => grid[row + i][col]).join('');
+            if (slice === pattern) {
+              return { row: row + 1, col: col + 1 }; // 1-based
+            }
+          }
+        }
+        return null;
       }
-      const idx = colStr.indexOf(sequence);
-      if (idx !== -1) return { row: idx + 1, col: c + 1 };
-    }
-    return null;
-  }
 
+    const hMatch = scanHorizontal(grid);
+    const vMatch = scanVertical(grid);
+
+    console.log(hMatch, vMatch)
+
+    if (hMatch && vMatch) {
+        
+        const hIndex = (hMatch.row - 1) * maxCols + (hMatch.col - 1)
+        const vIndex = (vMatch.row - 1) * maxCols + (vMatch.col - 1)
+
+        const atomicNumber = hIndex + vIndex + 2;
+        const result = [];
+        console.log(atomicNumber)
+        const match = alchemicalSymbols.find(e => e.atomicNumber === atomicNumber);
+        console.log(match)
+        if (match) {
+            result.push(match.name);
+        }
+
+        await submitAnswer(result);
+        console.log("Response from Alchemy API:", result)
+    }
+}
+ 
 /**
  * Submits an answer to the Alchemy system.
  * @param {string|number} answer - The computed answer to submit.
  */
-async function submitAnswer(answer, atomicNumber) {
+async function submitAnswer(answer) {
     try {
         console.log("Submitting alchemy answer...");
         const response = await fetch(`${ALCHEMY_API}/answer`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer, atomicNumber })
+            body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer})
         });
-        console.log(answer, atomicNumber);
+        console.log(answer);
         return await response.json();
     } catch (error) {
         console.error("Error submitting alchemy answer:", error);
@@ -222,5 +238,4 @@ async function getClue() {
 }
 
 // Run the mission
-//startMission().catch(console.error);
-challenge4()
+startMission().catch(console.error);

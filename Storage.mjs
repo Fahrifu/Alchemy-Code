@@ -17,7 +17,8 @@ export const alchemicalSymbols = [
     { name: "Air", symbol: "🜁", atomicNumber: null },
     { name: "Fire", symbol: "🜂", atomicNumber: null },
     { name: "Water", symbol: "🜄", atomicNumber: null },
-    { name: "Helium", symbol: "He", atomicNumber: 2 }
+    { name: "Helium", symbol: "He", atomicNumber: 2 },
+    { name: "Argon", symbol: "Ar", atomicNumber: 18 }
 
   ];
   
