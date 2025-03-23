@@ -3,7 +3,7 @@ import fs from 'fs';
 import { cipher } from './Deciper.mjs';
 import { numberToChar } from './Deciper.mjs';
 import { alchemicalSymbols, symbolMap } from './Storage.mjs';
-import { encryptedGrid } from './encryptedgrid.mjs';
+import { encodedBlock, encryptedGrid, text } from './encryptedgrid.mjs';
 
 // Email for authentication
 const PLAYER_EMAIL = "hlmnguyen@uia.no";
@@ -34,7 +34,6 @@ async function startMission() {
         } else if (challenge.includes("Hidden experiments")) {
             await challenge4();
         }
-        
     } catch (error) {
         console.error("Error starting mission:", error);
     }
@@ -131,19 +130,34 @@ async function challenge3() {
 
 
 async function challenge4() {
-      
-    const encodedBlock = [
-        'GOLD COPPER GOLD GOLD SILVER',
-        'EARTH MERCURY COPPER FIRE AIR',
-        'FIRE EARTH LEAD EARTH SILVER',
-        'IRON GOLD SILVER WATER GOLD',
-        'COPPER FIRE GOLD IRON LEAD',
-        'EARTH COPPER COPPER TIN MERCURY'
-    ];
 
-    console.log(encodedBlock);
+    const capitalLetters = [...text].filter(char => /[A-Z]/.test(char)).join('');
+    console.log("All Capital Letters: ", capitalLetters);
 
-    const pattern = encodedBlock
+    const plainAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const decryptionMap = Object.fromEntries(capitalLetters.split('').map((c, i) => [c, plainAlphabet[i]]));
+    const decoded = encodedBlock
+        .trim()
+        .split('\n')
+        .map(line =>
+            line
+            .split(' ')
+            .map(word =>
+                word
+                .split('')
+                .map(char => decryptionMap[char] || char)
+                .join('')
+            )
+            .join(' ')
+        )
+        .join('\n');
+
+        console.log(decoded)
+
+
+
+    const pattern = decoded
+    .split('\n')
     .flatMap(line =>
         line.split(' ').map(word => symbolMap[word.toLowerCase()])
     )
@@ -194,17 +208,26 @@ async function challenge4() {
         const vIndex = (vMatch.row - 1) * maxCols + (vMatch.col - 1)
 
         const atomicNumber = hIndex + vIndex + 2;
-        const result = [];
+        let result = "";
         console.log(atomicNumber)
         const match = alchemicalSymbols.find(e => e.atomicNumber === atomicNumber);
         console.log(match)
         if (match) {
-            result.push(match.name);
+            result = match.name;
         }
+        console.log(result)
+        const submit = await submitAnswer(result);
+        if (!submit) {
+            console.log("Alchemy Api cant find data");
+            return;
+        }
+        console.log("Response from Alchemy API:", submit)
 
-        await submitAnswer(result);
-        console.log("Response from Alchemy API:", result)
+        if (submit.sceletonkey) {
+            skeletonKey(submit.sceletonkey);
+        }
     }
+        
 }
  
 /**
@@ -220,10 +243,21 @@ async function submitAnswer(answer) {
             body: JSON.stringify({ player: PLAYER_EMAIL, answer: answer})
         });
         console.log(answer);
-        return await response.json();
+        const text = await response.text();
+        if (text) {
+            return JSON.parse(text);
+        } else {
+            console.warn("Empty response body")
+            return null;
+        }
     } catch (error) {
         console.error("Error submitting alchemy answer:", error);
     }
+}
+
+function skeletonKey(key) {
+    fs.writeFileSync("skeleton.txt", key, "utf-8");
+    console.log("Skeleton key saved");
 }
 
 async function getClue() {
