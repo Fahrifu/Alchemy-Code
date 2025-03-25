@@ -1,4 +1,4 @@
-# 🧪 Alchemy-Code Challenge Series
+# Alchemy-Code Challenge Series
 
 This repository documents solutions for four cryptographic challenges involving decoding alchemical symbols, cipher texts, poetic clues, and symbolic grid scanning.
 
