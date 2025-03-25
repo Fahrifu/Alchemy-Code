@@ -6,7 +6,7 @@ import { alchemicalSymbols, symbolMap } from './Storage.mjs';
 import { encodedBlock, encryptedGrid, text } from './encryptedgrid.mjs';
 
 // Email for authentication
-const PLAYER_EMAIL = "test04@uia.no";
+const PLAYER_EMAIL = "hlmnguyen@uia.no";
 
 // Base URLs for the systems
 const ALCHEMY_API = "https://alchemy-kd0l.onrender.com";
@@ -62,10 +62,7 @@ async function solveAlchemyStage1() {
         // Submit the answer
         const result = await submitAnswer(decodedSequence);
         console.log("Response from Alchemy API:", result);
-
-        /*if (result.message.toLowerCase().includes("incorrect answer")) {
-            await getClue();
-        } */
+        
     } catch (error) {
         console.error(error);
     }
@@ -256,7 +253,7 @@ async function submitAnswer(answer) {
 }
 
 function skeletonKey(key) {
-    fs.writeFileSync("skeleton.txt", key, "utf-8");
+    fs.writeFileSync("skeletonkey.txt", key, "utf-8");
     console.log("Skeleton key saved");
 }
 
