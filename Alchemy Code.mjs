@@ -6,7 +6,7 @@ import { alchemicalSymbols, symbolMap } from './Storage.mjs';
 import { encodedBlock, encryptedGrid, text } from './encryptedgrid.mjs';
 
 // Email for authentication
-const PLAYER_EMAIL = "hlmnguyen@uia.no";
+const PLAYER_EMAIL = "test04@uia.no";
 
 // Base URLs for the systems
 const ALCHEMY_API = "https://alchemy-kd0l.onrender.com";
